@@ -26,12 +26,12 @@ import BottomNav from "../components/BottomNav";
 
 
 
-export default function Navigation({colorScheme}: { colorScheme: ColorSchemeName }) {
+export default function Navigation() {
 
     return (
         <NavigationContainer
             linking={LinkingConfiguration}
-            theme={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+            theme={DefaultTheme}>
             <RootNavigator/>
 
         </NavigationContainer>

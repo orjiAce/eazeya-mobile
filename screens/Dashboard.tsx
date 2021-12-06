@@ -23,6 +23,8 @@ export default function Dashboard({navigation}: RootTabScreenProps<'TabOne'>) {
                         showsVerticalScrollIndicator={false}
                         contentContainerStyle={{
                             alignItems: 'center',
+                            width:'100%',
+                            backgroundColor: '#fff',
                         }}
             >
 
