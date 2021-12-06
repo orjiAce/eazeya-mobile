@@ -1,7 +1,6 @@
 import * as React from 'react';
-import {ScrollView, StyleSheet, TextInput as RNTextInput, TouchableOpacity,} from 'react-native';
+import {ScrollView,View,Text, StyleSheet, TextInput as RNTextInput, TouchableOpacity,} from 'react-native';
 
-import {Text, View} from '../components/Themed';
 import {RootTabScreenProps} from '../types';
 
 import {SafeAreaView} from "react-native-safe-area-context";
