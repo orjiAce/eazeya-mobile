@@ -76,7 +76,7 @@ alignItems:'center'
                     &&
                     <TouchableOpacity onPress={action} style={{
                         height: '100%',
-                        width: '5%',
+                        width: '10%',
                         alignItems: 'center',
                         justifyContent: "center"
                     }}>

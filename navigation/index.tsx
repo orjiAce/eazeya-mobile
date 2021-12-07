@@ -7,11 +7,10 @@ import {FontAwesome} from '@expo/vector-icons';
 import {NavigationContainer, DefaultTheme, DarkTheme} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import * as React from 'react';
-import { ColorSchemeName} from 'react-native';
 
 import ModalScreen from '../screens/ModalScreen';
 import NotFoundScreen from '../screens/NotFoundScreen';
-import {RootStackParamList, RootTabParamList, RootTabScreenProps, StartTabParamList} from '../types';
+import {RootStackParamList, StartTabParamList} from '../types';
 import LinkingConfiguration from './LinkingConfiguration';
 import StartScreen from "../screens/StartScreen";
 import LoginScreen from "../screens/LoginScreen";
@@ -20,6 +19,7 @@ import LoginScreen from "../screens/LoginScreen";
 
 
 import BottomNav from "../components/BottomNav";
+import SignUp from "../screens/SignUp";
 
 
 
@@ -73,6 +73,7 @@ function StartNavigation() {
     }}>
         <StartNav.Screen  name='StartScreen' component={StartScreen}/>
         <StartNav.Screen name='LoginScreen' component={LoginScreen}/>
+        <StartNav.Screen name='SignUp' component={SignUp}/>
     </StartNav.Navigator>
     )
 }

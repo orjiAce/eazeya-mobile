@@ -9,11 +9,10 @@ import {
     TouchableOpacity,
     KeyboardAvoidingView, Platform
 } from "react-native";
-import {Svg, Path} from "react-native-svg";
+
 import {SafeAreaView} from "react-native-safe-area-context";
 import Colors from "../constants/Colors";
-import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPixel} from "../utils/normalize";
-import {Ionicons} from "@expo/vector-icons";
+import {fontPixel, heightPixel, pixelSizeHorizontal, widthPixel} from "../utils/normalize";
 import DefaultTextInput from "../components/inputs/DefaultTextInput";
 
 import * as yup from 'yup';
@@ -296,7 +295,7 @@ const LoginScreen = ({navigation}: any) => {
                             </Text>
                         </TouchableOpacity>
 
-                        <View style={{
+                        <TouchableOpacity onPress={() => navigation.navigate('SignUp')} style={{
                             width: '90%',
                             justifyContent: 'center',
                             alignItems: 'center',
@@ -324,7 +323,7 @@ const LoginScreen = ({navigation}: any) => {
                                     Sign Up
                                 </Text>
                             </View>
-                        </View>
+                        </TouchableOpacity>
 
                     </View>
 

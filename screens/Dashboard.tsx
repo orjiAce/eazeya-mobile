@@ -126,8 +126,8 @@ export default function Dashboard({navigation}: RootTabScreenProps<'TabOne'>) {
                                 backgroundColor:'transparent'
                             }}>
 
+                                <Feather name="send" size={24} color={Colors.primaryColor}  />
 
-                            <Feather name="truck" size={24} color={Colors.primaryColor} />
                             </View>
                             <View style={{
                                 width:'70%',
