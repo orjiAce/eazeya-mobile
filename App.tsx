@@ -5,6 +5,9 @@ import { SafeAreaProvider,initialWindowMetrics } from 'react-native-safe-area-co
 import useCachedResources from './hooks/useCachedResources';
 import useColorScheme from './hooks/useColorScheme';
 import Navigation from './navigation';
+import {KeyboardAvoidingView, Platform} from "react-native";
+import {store} from "./app/store";
+import {Provider} from "react-redux";
 
 
 export default function App() {
@@ -15,10 +18,14 @@ export default function App() {
     return null;
   } else {
     return (
+        <Provider store={store}>
       <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-        <Navigation colorScheme={colorScheme} />
-        <StatusBar />
+
+        <Navigation />
+
+        <StatusBar style={ 'dark'} />
       </SafeAreaProvider>
+        </Provider>
     );
   }
 }

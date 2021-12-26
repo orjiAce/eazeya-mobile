@@ -5,7 +5,7 @@ import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPix
 import Colors from "../constants/Colors";
 import DeliverAnime from "../components/DeliveryAnime";
 
-const StartScreen = ({navigation}:any) => {
+const StartScreen = ({navigation}: any) => {
     return (
         <SafeAreaView style={{
             flex: 1,
@@ -33,7 +33,7 @@ const StartScreen = ({navigation}:any) => {
                         width: widthPixel(350),
                         height: widthPixel(250),
                         borderRadius: 10,
-backgroundColor:Colors.tint
+                        backgroundColor: Colors.tint
 
                     }}>
 
@@ -83,29 +83,29 @@ backgroundColor:Colors.tint
                         <Text style={{
                             fontFamily: 'GT-bold',
                             color: '#fff',
-                            fontSize:fontPixel(20)
+                            fontSize: fontPixel(20)
                         }}>
                             START HERE
                         </Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity onPress={()=> navigation.navigate('LoginScreen')} style={{
-                        width:'65%',
+                    <TouchableOpacity onPress={() => navigation.navigate('LoginScreen')} style={{
+                        width: '65%',
                         justifyContent: 'space-evenly',
                         alignItems: 'center',
                         flexDirection: 'row'
                     }}>
                         <Text style={{
                             fontFamily: 'GT-regular',
-                            color:'#1b1b1b',
-                                fontSize:fontPixel(16)
+                            color: '#1b1b1b',
+                            fontSize: fontPixel(16)
                         }}>
                             Already have an account?
                         </Text>
                         <Text style={{
                             fontFamily: 'GT-regular',
-                            color:Colors.primaryColor,
-                            fontSize:fontPixel(16)
+                            color: Colors.primaryColor,
+                            fontSize: fontPixel(16)
                         }}>
                             Login
                         </Text>

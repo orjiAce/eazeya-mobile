@@ -1,5 +1,7 @@
 import * as React from 'react';
-import {ScrollView, View, Text, StyleSheet, TouchableOpacity,} from 'react-native';
+
+import Constants from 'expo-constants';
+import {ScrollView,View,Text, StyleSheet, TextInput as RNTextInput, TouchableOpacity,} from 'react-native';
 
 import {RootTabScreenProps} from '../types';
 
@@ -9,11 +11,11 @@ import TopBar from "../components/view/TopBar";
 import Colors from "../constants/Colors";
 import {Feather} from "@expo/vector-icons";
 
-import {GOOGLE_MAPS_API_KEY} from "@env";
-import {GooglePlacesAutocomplete} from "react-native-google-places-autocomplete";
+//const GOOGLE_PLACES_API_KEY = 'AIzaSyCE71u7ryI37ySHtISd10smNBS9KsZU1hs'; // never save your real api key in a snack!
+import { GOOGLE_MAPS_API_KEY } from "@env";
+import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 
-
-export default function Dashboard({navigation}: any) {
+const Home = ({navigation}:any) => {
     return (
         <SafeAreaView style={{
             flex: 1,
@@ -21,15 +23,6 @@ export default function Dashboard({navigation}: any) {
             backgroundColor: '#fff',
 
         }}>
-             <ScrollView scrollEnabled
-
-                        showsVerticalScrollIndicator={false}
-                        contentContainerStyle={{
-                            alignItems: 'center',
-                            width:'100%',
-                            backgroundColor: '#fff',
-                        }}
-            >
 
 
             <TopBar navigation={navigation} routeName="Dashboard"/>
@@ -57,8 +50,6 @@ export default function Dashboard({navigation}: any) {
                     Joseph
                 </Text>
             </View>
-
-
             <View style={styles.container}>
                 <View style={{
                     width: '95%',
@@ -73,53 +64,55 @@ export default function Dashboard({navigation}: any) {
                 </View>
 
 
-                <View style={{
-                    borderColor: Colors.primaryColor,
-                    borderRadius: 10,
-                    borderWidth: 1,
-                    height: 60,
-                    width: '100%',
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'space-evenly'
-                }}>
-                    <View style={{
-                        width: '10%',
-                        height: '90%',
+            <GooglePlacesAutocomplete
+                styles={{
+                    textInputContainer:{
+                        borderColor: Colors.primaryColor,
+                        borderRadius: 10,
+                        padding:10,
+                        borderWidth: 1,
+                        height: 60,
+                        width: '100%',
+                        flexDirection: 'row',
                         alignItems: 'center',
-                        justifyContent: 'center',
+                        justifyContent: 'space-evenly'
+                    },
 
-                    }}>
-                        <Feather name="map-pin" size={20} color="black"/>
-                    </View>
-                     <TouchableOpacity
-                         onPress={() => navigation.navigate('LocationScreen')}
-                            style={{
-                                borderLeftColor: '#F0F0F0',
-                                borderLeftWidth: 1,
-                                width: '80%',
-                                height: '80%',
-                                padding: 8,
-                                justifyContent:'center'
-                            }}
+                    textInput:{
+                        height:'90%',
+                        width:'80%'
+                    }
 
-                        >
-                         <Text>
-                             Sending to?
-                         </Text>
-                     </TouchableOpacity>
-
-
-                </View>
-
-
-
+                }}
+                renderLeftButton={() =><Feather name="map-pin" size={20} color="black"/>}
+                autoFillOnNotFound={true}
+                currentLocationLabel="click"
+                listViewDisplayed="auto"
+                listUnderlayColor={"#333"}
+                nearbyPlacesAPI="GooglePlacesSearch"
+                debounce={400}
+                currentLocation={true}
+                placeholder="Where from?"
+                enablePoweredByContainer={false}
+                minLength={2}
+                fetchDetails={true}
+                query={{
+                    key: GOOGLE_MAPS_API_KEY,
+                    language: 'en', // language of the results
+                }}
+                onPress={(data, details = null) => console.log(data)}
+                onFail={(error) => console.error(error)}
+                requestUrl={{
+                    url:
+                        'https://cors-anywhere.herokuapp.com/https://maps.googleapis.com/maps/api',
+                    useOnPlatform: 'web',
+                }} // this in only required for use on the web. See https://git.io/JflFv more for details.
+            />
 
 
             </View>
 
-
-             <View style={styles.quickActions}>
+     {/*            <View style={styles.quickActions}>
                     <View style={{
                         width: '95%'
                     }}>
@@ -134,7 +127,7 @@ export default function Dashboard({navigation}: any) {
 
                     <View style={styles.actionButtonsWrap}>
 
-                        <TouchableOpacity   onPress={() => navigation.navigate('LocationScreen')} style={styles.actionButtons}>
+                        <TouchableOpacity style={styles.actionButtons}>
                             <View style={{
                                 width:'15%',
                                 justifyContent:'center',
@@ -243,18 +236,21 @@ export default function Dashboard({navigation}: any) {
                     </View>
 
 
-                </View>
-             </ScrollView>
+                </View>*/}
+
+
         </SafeAreaView>
     );
-}
+};
 
 const styles = StyleSheet.create({
+
+
     container: {
         width: '100%',
         alignItems: 'center',
         justifyContent: 'space-between',
-        height: 90
+height:190
     },
     title: {
         fontSize: fontPixel(20),
@@ -266,25 +262,27 @@ const styles = StyleSheet.create({
         width: '80%',
     },
     quickActions: {
-        marginTop: 50,
+        marginTop: 20,
         width: '100%',
         justifyContent: 'center',
         alignItems: "center"
     },
-    actionButtonsWrap: {
-        height: heightPixel(400),
-        width: '100%',
-        alignItems: 'center',
-        justifyContent: 'space-evenly'
-    },
-    actionButtons: {
-        width: '100%',
-        flexDirection: 'row',
-        alignItems: 'center',
-        padding: 15,
-        borderRadius: 10,
-        justifyContent: 'space-between',
-        backgroundColor: '#F8F9F9',
-        height: 100
+    actionButtonsWrap:{
+        height:heightPixel(400),
+        width:'100%',
+        alignItems:'center',
+        justifyContent:'space-evenly'
+    } ,
+    actionButtons:{
+        width:'100%',
+        flexDirection:'row',
+        alignItems:'center',
+        padding:15,
+        borderRadius:10,
+        justifyContent:'space-between',
+        backgroundColor:'#F8F9F9',
+        height:100
     }
 });
+
+export default Home;

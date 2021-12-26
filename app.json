@@ -20,13 +20,22 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.eazeya.eazeya-mobile-app",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "",
+        "NSLocationAlwaysUsageDescription": ""
+      }
     },
     "android": {
+      "versionCode": 1,
+      "package": "com.eazeya.eazeya",
       "adaptiveIcon": {
         "foregroundImage": "./assets/logos/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "permissions": ["CALL_PHONE","ACCESS_BACKGROUND_LOCATION","ACCESS_FINE_LOCATION","CAMERA"]
     },
     "web": {
       "favicon": "./assets/images/favicon.png"

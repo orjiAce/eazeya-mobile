@@ -20,6 +20,8 @@ import LoginScreen from "../screens/LoginScreen";
 
 import BottomNav from "../components/BottomNav";
 import SignUp from "../screens/SignUp";
+import MapScreen from "../screens/MapScreen";
+import LocationScreen from "../screens/LocationsScreen";
 
 
 
@@ -52,6 +54,8 @@ function RootNavigator() {
             animationTypeForReplace: 'push',
         }}>
             <Stack.Screen name="Start" component={StartNavigation} options={{headerShown: false}}/>
+            <Stack.Screen name="LocationScreen" component={LocationScreen} options={{headerShown: false}}/>
+            <Stack.Screen name="MapScreen" component={MapScreen} options={{headerShown: false}}/>
             <Stack.Screen name="Root" component={BottomNav} options={{headerShown: false}} />
             <Stack.Screen name="NotFound" component={NotFoundScreen} options={{title: 'Oops!'}}/>
             <Stack.Group screenOptions={{presentation: 'modal'}}>
