@@ -25,6 +25,7 @@ const LocationScreen = ({navigation}: any) => {
     const [errorMsg, setErrorMsg] = useState('');
 
 
+
     useEffect(() => {
         (async () => {
             //@ts-ignore
@@ -51,6 +52,14 @@ const LocationScreen = ({navigation}: any) => {
     } else if (location) {
         text = JSON.stringify(location);
     }
+
+
+/*    useEffect(() => {
+
+        navigator.geolocation.getCurrentPosition((l) => console.log('My location:',location));
+
+    }, []);*/
+
 
     return (
         <SafeAreaView style={{

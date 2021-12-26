@@ -77,7 +77,7 @@ export default () => (
 
 
         <Tabs.Screen
-            name="Chat"
+            name="Support"
             component={ChatScreen}
             options={{
                 tabBarIcon: ({focused, color}) => (

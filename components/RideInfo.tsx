@@ -30,9 +30,6 @@ const RideInfo = ({sheetRef, handleSheetChange, snapPoints}: sheetInterface) => 
           console.log("handleSheetChange", );
       }, []);*/
 
-    function truncate(str: any, n: number) {
-        return (str.length > n) ? str.substr(0, n - 1) + '...' : str;
-    };
 
     const animationConfigs = useBottomSheetSpringConfigs({
         damping: 80,
@@ -59,6 +56,11 @@ const RideInfo = ({sheetRef, handleSheetChange, snapPoints}: sheetInterface) => 
         // Make a call
         call(args).catch(console.error);
     };
+
+    function truncate(str: any, n: number) {
+        return (str.length > n) ? str.substr(0, n - 1) + '...' : str;
+    }
+
     return (
 
         <BottomSheet
@@ -67,7 +69,7 @@ const RideInfo = ({sheetRef, handleSheetChange, snapPoints}: sheetInterface) => 
             snapPoints={snapPoints}
             onChange={handleSheetChange}
             style={styles.container}
-            enableOverDrag
+
             handleIndicatorStyle={{
                 backgroundColor: '#333'
             }}

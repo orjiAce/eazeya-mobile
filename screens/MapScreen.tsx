@@ -25,7 +25,7 @@ const MapScreen = ({navigation}: any) => {
     const sheetRef = useRef<BottomSheet>(null);
 
     // variables
-    const snapPoints = useMemo(() => ["55%", "100%"], []);
+    const snapPoints = useMemo(() => ["35%", "100%"], []);
 
     // callbacks
     const handleSheetChange = useCallback((index) => {
