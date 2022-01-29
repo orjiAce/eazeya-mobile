@@ -88,7 +88,7 @@ alignItems:'center',
 
 
     <View style={styles.container}>
-      <Text style={styles.title}>Tab Two</Text>
+
 
     </View>
         </ScrollView>

@@ -1,13 +1,11 @@
-import React, {useCallback, useMemo, useRef, useState} from "react";
+import React, {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {
     View,
     Text,
-    Image,
     ScrollView,
     StyleSheet,
-    Dimensions,
     TouchableOpacity,
-    KeyboardAvoidingView, Platform
+    KeyboardAvoidingView, Platform, ActivityIndicator
 } from "react-native";
 
 import {SafeAreaView} from "react-native-safe-area-context";
@@ -19,6 +17,13 @@ import * as yup from 'yup';
 import {useFormik} from "formik";
 import {BottomSheetModal} from "@gorhom/bottom-sheet";
 import ResetPassword from "../components/form/ResetPassword";
+import {useAppDispatch} from "../app/hooks";
+import {doc, getDoc, getFirestore} from "firebase/firestore";
+import {signInWithEmailAndPassword} from 'firebase/auth';
+import {auth, db} from "../firebase";
+import {loginUser, setAuthenticated} from "../app/slices/userSlice";
+import Toast from "../components/Toast";
+
 
 const formSchema = yup.object().shape({
     password: yup.string().required('Password is required'),
@@ -29,6 +34,16 @@ const formSchema = yup.object().shape({
 const LoginScreen = ({navigation}: any) => {
 
     //for reset password form
+
+    const dispatch = useAppDispatch();
+    const firestore = getFirestore();
+
+
+    const [loading, setLoading] = useState(false);
+    const [responseMessage, setResponseMessage] = useState('');
+    const [responseState, setResponseState] = useState(false);
+    const [responseType, setResponseType] = useState('');
+
 
     const handleSheetChanges = useCallback((index: number) => {
         console.log('handleSheetChanges', index);
@@ -59,6 +74,50 @@ const LoginScreen = ({navigation}: any) => {
     const [focusPassword, setFocusPassword] = useState<boolean>(false);
     const [contentPassword, setContentPassword] = useState<string>('');
 
+   const signIn = (email: string, password: string) => {
+        setLoading(true)
+        signInWithEmailAndPassword(auth, email, password).then((r) => {
+            getDoc(doc(db, 'users', r.user.uid)).then((
+                result
+            ) => {
+                const userData = {
+                    createdAt: result.data().createdAt,
+                    email: result.data().email,
+                    emailVerified: result.data().emailVerified,
+                    firstName: result.data().firstName,
+                    lastName: result.data().lastName,
+                    phone: result.data().phone,
+                    photoURL: result.data().photoURL,
+                    uid: r.user.uid
+                }
+                setLoading(false)
+                setResponseState(true)
+                setResponseType('success')
+                setResponseMessage("Successful")
+
+                dispatch(loginUser(userData))
+                dispatch(setAuthenticated(true))
+
+            }).catch(err => {
+                setLoading(false)
+                setResponseType('error')
+                setResponseState(true)
+                setResponseMessage('Network error, try again')
+            })
+
+
+        }).catch(err => {
+            setLoading(false)
+            setResponseType('error')
+            setResponseState(true)
+            setResponseMessage(err.message)
+        }).finally(() => {
+            setLoading(false)
+            setResponseType('error')
+            setResponseState(true)
+            setResponseMessage('Network error, try again')
+        })
+    }
 
     const {
         handleChange, handleSubmit, handleBlur,
@@ -74,12 +133,25 @@ const LoginScreen = ({navigation}: any) => {
         },
         onSubmit: (values) => {
             const {email, password} = values;
-            const userData = new FormData();
-            userData.append("email", email);
-            userData.append("password", password);
+            signIn(email, password)
 
         }
     });
+
+
+    useEffect(() => {
+        if (responseState || responseMessage) {
+
+
+            const time = setTimeout(() => {
+                setResponseState(false)
+                setResponseMessage('')
+            }, 3500)
+            return () => {
+                clearTimeout(time)
+            };
+        }
+    }, [responseState, responseMessage]);
 
     return (
         <>
@@ -89,6 +161,7 @@ const LoginScreen = ({navigation}: any) => {
                 backgroundColor: '#fff',
                 alignItems: 'center'
             }}>
+                <Toast title={responseType} message={responseMessage} state={responseState} type={responseType}/>
                 <ScrollView scrollEnabled
                             showsVerticalScrollIndicator={false}
                             style={{
@@ -213,25 +286,26 @@ const LoginScreen = ({navigation}: any) => {
 
 
                                 <TouchableOpacity
+                                    disabled={!isValid || loading}
                                     onPress={() => {
                                         handleSubmit();
                                     }}
 
                                     activeOpacity={0.7}
-                                    style={{
-                                        width: '100%',
-                                        height: '100%',
-                                        alignItems: 'center',
-                                        justifyContent: 'center'
-                                    }}
+                                    style={[styles.submitBtn,{
+                                        backgroundColor: !isValid ? "#ddd" : Colors.primaryColor,
+                                    }]}
                                 >
-                                    <Text style={{
-                                        color: 'white',
-                                        fontSize: fontPixel(20),
-                                        fontFamily: 'GT-bold'
-                                    }}> Login
-                                    </Text>
-
+                                    {
+                                        loading ? <ActivityIndicator color={Colors.light.background} size={"large"}/>
+                                            :
+                                            <Text style={{
+                                                color: 'white',
+                                                fontSize: fontPixel(20),
+                                                fontFamily: 'GT-bold'
+                                            }}> Login
+                                            </Text>
+                                    }
                                 </TouchableOpacity>
                             </View>
 
@@ -246,54 +320,6 @@ const LoginScreen = ({navigation}: any) => {
                         justifyContent: 'space-between',
                         alignItems: 'center',
                     }}>
-                        <View style={{
-                            width: '90%',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            flexDirection: 'row',
-                            height: 20
-                        }}>
-
-
-                            <View style={styles.border}/>
-                            <Text style={{
-                                color: Colors.tintText,
-                                fontSize: fontPixel(14),
-                                fontFamily: 'GT-medium'
-                            }}>
-                                or Sign in with Google
-                            </Text>
-                            <View style={styles.border}/>
-                        </View>
-
-
-                        <TouchableOpacity onPress={() => navigation.navigate('Root')} style={{
-                            width: widthPixel(350),
-                            height: 60,
-                            backgroundColor: '#eee',
-                            borderRadius: 10,
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            flexDirection: 'row'
-                        }}>
-                            <Image
-                                source={{uri: 'https://www.freepnglogos.com/uploads/google-logo-png/google-logo-png-webinar-optimizing-for-success-google-business-webinar-13.png'}}
-
-                                style={{
-                                    marginHorizontal: 5,
-                                    resizeMode: 'cover',
-                                    width: 30,
-                                    height: 30
-                                }}/>
-                            <Text style={{
-                                marginHorizontal: 5,
-                                color: "#333",
-                                fontSize: fontPixel(18),
-                                fontFamily: 'GT-medium'
-                            }}>
-                                Google
-                            </Text>
-                        </TouchableOpacity>
 
                         <TouchableOpacity onPress={() => navigation.navigate('SignUp')} style={{
                             width: '90%',
@@ -364,6 +390,13 @@ const styles = StyleSheet.create({
         width: '25%',
         borderWidth: 1,
         borderColor: "#EEEEEE"
+    },
+    submitBtn:{
+        width: '100%',
+        height: '100%',
+        borderRadius:10,
+        alignItems: 'center',
+        justifyContent: 'center'
     }
 });
 

@@ -8,17 +8,21 @@ import {useSelector} from "react-redux";
 import {selectDestination, selectOrigin, selectTravelTimeInfo} from "../app/slices/navigationSlice";
 import call from 'react-native-phone-call';
 import numberWithCommas from "../utils/NumberWithComma";
+import {useAppSelector} from "../app/hooks";
+import { IF } from "./helper/ConditionJsx";
+import ConfirmPickup from "./ConfirmPickup";
 
 
 interface sheetInterface {
     sheetRef: any,
     snapPoints: any,
-    handleSheetChange: any
+    handleSheetChange: any,
+    rideType:string
 }
 
 let SURGE_CHARGE_RATE = 1.5;
 
-const RideInfo = ({sheetRef, handleSheetChange, snapPoints}: sheetInterface) => {
+const RideInfo = ({sheetRef, handleSheetChange, snapPoints, rideType}: sheetInterface) => {
     // hooks
     // const sheetRef = useRef<BottomSheet>(null);
 
@@ -29,6 +33,9 @@ const RideInfo = ({sheetRef, handleSheetChange, snapPoints}: sheetInterface) => 
     /*  const handleSheetChange = useCallback((index) => {
           console.log("handleSheetChange", );
       }, []);*/
+
+    const user = useAppSelector(state => state.user)
+    const {onARide} = user
 
 
     const animationConfigs = useBottomSheetSpringConfigs({
@@ -45,7 +52,7 @@ const RideInfo = ({sheetRef, handleSheetChange, snapPoints}: sheetInterface) => 
     const destination = useSelector(selectDestination);
     const travelTimeInformation = useSelector(selectTravelTimeInfo);
 
-    const triggerCall = (phone) => {
+    const triggerCall = (phone: string) => {
         // Check for perfect 10 digit length
 
 
@@ -80,211 +87,171 @@ const RideInfo = ({sheetRef, handleSheetChange, snapPoints}: sheetInterface) => 
             animationConfigs={animationConfigs}
         >
             <BottomSheetView style={styles.rideInfoView}>
-                <View style={styles.top}>
+                <IF condition={onARide}>
+                    <View style={styles.top}>
+
+                        {/**/}
 
 
-                    {/**/}
+                        <View style={styles.infoWrap}>
+
+                            <View style={styles.vehicleDets}>
 
 
-                    <View style={{
-                        width: '100%',
-                        alignItems: 'center',
-                        height: '35%',
-                        justifyContent: 'space-between',
-                        flexDirection: 'row'
-                    }}>
-
-                        <View style={{
-                            width: '55%',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            flexDirection: 'row'
-                        }}>
+                                <View style={styles.info}>
+                                    <Text style={{
+                                        fontFamily: 'GT-bold'
+                                    }}>
+                                        BIKE
+                                    </Text>
+                                </View>
 
 
-                            <View style={styles.info}>
-                                <Text style={{
-                                    fontFamily: 'GT-bold'
-                                }}>
-                                    BIKE
-                                </Text>
+                                <View style={styles.info}>
+                                    <Text style={{
+                                        fontFamily: 'GT-bold'
+                                    }}>
+                                        3A4 ABJ 23
+                                    </Text>
+                                </View>
                             </View>
 
-
-                            <View style={styles.info}>
-                                <Text style={{
-                                    fontFamily: 'GT-bold'
-                                }}>
-                                    3A4 ABJ 23
+                            <TouchableOpacity>
+                                <Text style={styles.cancelTxt}>
+                                    Cancel
                                 </Text>
-                            </View>
+                            </TouchableOpacity>
+
                         </View>
 
-                        <TouchableOpacity>
-                            <Text style={{
-                                color: Colors.primaryColor,
-                                fontSize: fontPixel(16),
-                                fontFamily: 'GT-bold'
+
+                        <View style={styles.driverDetails}
+                        >
+                            <View style={styles.driverIMG}>
+
+
+                                <Image resizeMethod="scale" resizeMode="cover" style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    resizeMode: 'cover'
+                                }}
+                                       source={{uri: 'https://images.unsplash.com/photo-1624234561795-dfe505d1ccbc?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTEwfHxibGFjayUyMG1hbiUyMHBvcnRhaXR8ZW58MHx8MHx8&auto=format&fit=crop&w=800&q=60'}}/>
+
+
+                            </View>
+
+                            <View style={{
+                                width: '55%',
+                                paddingLeft: 10,
+                                justifyContent:'space-evenly',
+                                height:'80%'
                             }}>
-                                Cancel
-                            </Text>
-                        </TouchableOpacity>
+                                <Text style={{
+                                    fontSize:fontPixel(14),
+                                    fontFamily: 'GT-medium'
+                                }}>
+                                    Your rider
+                                </Text>
+                                <Text style={{
+                                    fontSize:fontPixel(18),
+                                    fontFamily: 'GT-bold'
+                                }}>
+                                    Joshua Mark
+                                </Text>
+
+                                <Text style={{
+                                    fontSize:fontPixel(14),
+                                    color:'#BBBBBC',
+                                    fontFamily: 'GT-medium'
+                                }}>
+                                    1000 rides
+                                </Text>
+
+
+                                <View style={{
+                                    flexDirection:'row'
+                                }}>
+                                    <Ionicons name="star" size={14} color={Colors.orange} />
+                                    <Ionicons name="star" size={14} color={Colors.orange} />
+                                    <Ionicons name="star" size={14} color={Colors.orange} />
+                                </View>
+
+                            </View>
+
+                            <View style={{
+                                width: '40%',
+                                alignItems: 'center'
+                            }}>
+                                <Text style={{
+                                    color: '#333333',
+                                    fontFamily: 'GT-bold',
+                                    fontSize: fontPixel(18)
+                                }}>₦{
+                                    /*   new Intl.NumberFormat("us", {
+                                              currency: "NGN",
+                                              style: "currency",
+                                          }).format(((travelTimeInformation?.duration.value || 0) *
+                                              SURGE_CHARGE_RATE
+                                              * 100) / 100).replace('NGN', '₦')*/
+
+                                    numberWithCommas( ((travelTimeInformation?.duration?.value || 0)* SURGE_CHARGE_RATE * 100) /100)
+                                }
+                                </Text>
+                                <Text style={{
+                                    fontFamily: 'GT-medium',
+                                    fontSize: fontPixel(14)
+                                }}>
+                                    Cash
+                                </Text>
+                            </View>
+
+                        </View>
 
                     </View>
 
+                    <View style={styles.bottom}>
+                        <View style={styles.mapLine}>
 
-                    <View style={{
-                        width: '100%',
-                        alignItems: 'center',
-                        height: '65%',
-                        justifyContent: 'space-between',
-                        flexDirection: 'row'
-                    }}
-                    >
-                        <View style={{
-                            width: 50,
-                            height: 50,
-                            borderRadius: 100,
-                            overflow: 'hidden',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                        }}>
-
-
-                            <Image resizeMethod="scale" resizeMode="cover" style={{
-                                width: '100%',
-                                height: '100%',
-                                resizeMode: 'cover'
-                            }}
-                                   source={{uri: 'https://images.unsplash.com/photo-1624234561795-dfe505d1ccbc?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTEwfHxibGFjayUyMG1hbiUyMHBvcnRhaXR8ZW58MHx8MHx8&auto=format&fit=crop&w=800&q=60'}}/>
-
+                            <Octicons name="primitive-dot" size={20} color="black"/>
+                            <View style={styles.border}/>
+                            <FontAwesome name="map-marker" size={18} color={Colors.primaryColor}/>
 
                         </View>
-
-                        <View style={{
-                            width: '55%',
-                            paddingLeft: 10,
-                            justifyContent:'space-evenly',
-                            height:'80%'
-                        }}>
+                        <View style={styles.location}>
                             <Text style={{
-                                fontSize:fontPixel(14),
-                                fontFamily: 'GT-medium'
+                                fontFamily: 'GT-medium',
+                                color: '#161D4D',
+                                fontSize: fontPixel(16)
                             }}>
-                                Your rider
-                            </Text>
-                            <Text style={{
-                                fontSize:fontPixel(18),
-                                fontFamily: 'GT-bold'
-                            }}>
-                                Joshua Mark
-                            </Text>
-
-                            <Text style={{
-                                fontSize:fontPixel(14),
-                                color:'#BBBBBC',
-                                fontFamily: 'GT-medium'
-                            }}>
-                                1000 rides
-                            </Text>
-
-
-                            <View style={{
-                                flexDirection:'row'
-                            }}>
-                                <Ionicons name="star" size={14} color={Colors.orange} />
-                                <Ionicons name="star" size={14} color={Colors.orange} />
-                                <Ionicons name="star" size={14} color={Colors.orange} />
-                            </View>
-
-                        </View>
-
-                        <View style={{
-                            width: '40%',
-                            alignItems: 'center'
-                        }}>
-                            <Text style={{
-                                color: '#333333',
-                                fontFamily: 'GT-bold',
-                                fontSize: fontPixel(18)
-                            }}>₦{
-                      /*   new Intl.NumberFormat("us", {
-                                currency: "NGN",
-                                style: "currency",
-                            }).format(((travelTimeInformation?.duration.value || 0) *
-                                SURGE_CHARGE_RATE
-                                * 100) / 100).replace('NGN', '₦')*/
-
-                            numberWithCommas( ((travelTimeInformation?.duration?.value || 0)* SURGE_CHARGE_RATE * 100) /100)
-                            }
+                                {truncate(origin?.description, 25)}
                             </Text>
                             <Text style={{
                                 fontFamily: 'GT-medium',
-                                fontSize: fontPixel(14)
+                                color: '#80828B',
+                                fontSize: fontPixel(16),
+
                             }}>
-                                Cash
+                                {truncate(destination?.description, 25)}
                             </Text>
                         </View>
 
-                    </View>
-
-                </View>
-
-                <View style={styles.bottom}>
-                    <View style={{
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        height: '90%'
-                    }}>
-
-                        <Octicons name="primitive-dot" size={20} color="black"/>
-                        <View style={styles.border}/>
-                        <FontAwesome name="map-marker" size={18} color={Colors.primaryColor}/>
-
-                    </View>
-                    <View style={{
-                        width: '60%',
-                        alignItems: 'flex-start',
-                        justifyContent: 'space-evenly',
-                        height: '90%'
-
-                    }}>
-                        <Text style={{
-                            fontFamily: 'GT-medium',
-                            color: '#161D4D',
-                            fontSize: fontPixel(16)
-                        }}>
-                            {truncate(origin?.description, 25)}
-                        </Text>
-                        <Text style={{
-                            fontFamily: 'GT-medium',
-                            color: '#80828B',
-                            fontSize: fontPixel(16),
-
-                        }}>
-                            {truncate(destination?.description, 25)}
-                        </Text>
-                    </View>
-
-                    <View style={{
-                        width: '20%',
-                        height: '90%',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                    }}>
-                        <TouchableOpacity onPress={() => triggerCall('08103684893')} style={{
-                            width: 50,
-                            height: 50,
-                            borderRadius: 100,
+                        <View style={{
+                            width: '20%',
+                            height: '90%',
                             alignItems: 'center',
-                            justifyContent: 'center',
-                            backgroundColor: Colors.primaryColor
+                            justifyContent: 'center'
                         }}>
-                            <Ionicons name="call" size={24} color="#fff"/>
-                        </TouchableOpacity>
-                    </View>
+                            <TouchableOpacity onPress={() => triggerCall('08103684893')} style={styles.callBtn}>
+                                <Ionicons name="call" size={24} color="#fff"/>
+                            </TouchableOpacity>
+                        </View>
 
-                </View>
+                    </View>
+                </IF>
+
+                <IF condition={!onARide}>
+                    <ConfirmPickup price={travelTimeInformation?.duration?.value} location={origin?.description} rideType={rideType}/>
+                </IF>
 
             </BottomSheetView>
         </BottomSheet>
@@ -329,6 +296,58 @@ const styles = StyleSheet.create({
         borderRadius: 5,
 
         padding: 10,
+    },
+    infoWrap:{
+        width: '100%',
+        alignItems: 'center',
+        height: '35%',
+        justifyContent: 'space-between',
+        flexDirection: 'row'
+    },
+    vehicleDets:{
+        width: '55%',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexDirection: 'row'
+    },
+    cancelTxt:{
+        color: Colors.primaryColor,
+        fontSize: fontPixel(16),
+        fontFamily: 'GT-bold'
+    },
+    driverDetails:{
+        width: '100%',
+        alignItems: 'center',
+        height: '65%',
+        justifyContent: 'space-between',
+        flexDirection: 'row'
+    },
+    driverIMG:{
+        width: 50,
+        height: 50,
+        borderRadius: 100,
+        overflow: 'hidden',
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+    mapLine:{
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '90%'
+    },
+    location:{
+        width: '60%',
+        alignItems: 'flex-start',
+        justifyContent: 'space-evenly',
+        height: '90%'
+    },
+    callBtn:{
+        width: 50,
+        height: 50,
+        borderRadius: 100,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: Colors.primaryColor
     }
 });
 

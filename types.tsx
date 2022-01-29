@@ -19,7 +19,10 @@ export type RootStackParamList = {
   Start:  NavigatorScreenParams<StartTabParamList> | undefined;
   MapScreen:  NavigatorScreenParams<StartTabParamList> | undefined;
   LocationScreen:  NavigatorScreenParams<StartTabParamList> | undefined;
+  UpdateInfo: undefined;
+  AddPayment: undefined;
   Modal: undefined;
+  Notifications: undefined;
   NotFound: undefined;
 };
 

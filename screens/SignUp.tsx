@@ -1,6 +1,7 @@
-import React, {useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 
 import {
+    ActivityIndicator,
     Image,
     KeyboardAvoidingView,
     Platform,
@@ -19,6 +20,17 @@ import DefaultTextInput from "../components/inputs/DefaultTextInput";
 import Colors from "../constants/Colors";
 import PhoneInput from "react-native-phone-number-input";
 
+import {
+    sendPasswordResetEmail,
+    sendEmailVerification,
+    createUserWithEmailAndPassword
+} from 'firebase/auth'
+import {auth} from '../firebase'; // update path to your firestore config
+import {getFirestore, setDoc, doc, getDoc} from 'firebase/firestore';
+import {useAppDispatch, useAppSelector} from "../app/hooks";
+import {signUpUSer, setAuthenticated} from "../app/slices/userSlice";
+import Toast from "../components/Toast";
+
 
 const formSchema = yup.object().shape({
     password: yup.string().required('Password is required'),
@@ -28,7 +40,16 @@ const formSchema = yup.object().shape({
 })
 
 
-const SignUp = ({navigation}:any) => {
+const SignUp = ({navigation}: any) => {
+
+    const dispatch = useAppDispatch();
+    const firestore = getFirestore();
+
+
+    const [loading, setLoading] = useState(false);
+    const [responseMessage, setResponseMessage] = useState('');
+    const [responseState, setResponseState] = useState(false);
+    const [responseType, setResponseType] = useState('');
 
     const [focusEmail, setFocusEmail] = useState<boolean>(false);
     const [contentEmail, setContentEmail] = useState<string>('');
@@ -49,7 +70,6 @@ const SignUp = ({navigation}:any) => {
     const [contentLastName, setContentLastName] = useState<string>('');
 
 
-    const [focusPhone, setFocusPhone] = useState<boolean>(false);
     const [contentPhone, setContentPhone] = useState<string>('');
 
 
@@ -67,6 +87,53 @@ const SignUp = ({navigation}:any) => {
         setValid(checkValid ? checkValid : false);
     }
 
+    const register = (email: string, password: string, userDetails: any) => {
+        setLoading(true)
+        const {
+            lastName,
+            firstName,
+            phone,
+        } = userDetails
+        // Create a new user with email and password using firebase
+        createUserWithEmailAndPassword(auth, email, password)
+            .then(userCredentials => {
+                const user = userCredentials.user;
+                //console.log(user)
+                const userData = {
+                    lastName: lastName,
+                    firstName: firstName,
+                    phone: phone,
+                    email: email,
+                    emailVerified: user.emailVerified,
+                    photoURL: user.photoURL,
+                    favAddress:'',
+                    ID: user.uid
+                }
+                setDoc(doc(firestore, "users", user.uid),
+                    {...userData, createdAt: Date.now()}
+                ).then(r => {
+                        setLoading(false)
+                        setResponseState(true)
+                        setResponseType('success')
+                        setResponseMessage("Account registers, Verify your email")
+                        dispatch(signUpUSer(userData))
+                        dispatch(setAuthenticated(true))
+
+                    }
+                ).catch(err => console.log('ERR' + err));
+
+                setLoading(false)
+            })
+            .catch(error => {
+                setLoading(false)
+                setResponseType('error')
+                setResponseState(true)
+                setResponseMessage(error.message)
+
+            })
+    }
+
+
     const {
         handleChange, handleSubmit, handleBlur,
         setFieldValue,
@@ -77,27 +144,48 @@ const SignUp = ({navigation}:any) => {
     } = useFormik({
         validationSchema: formSchema,
         initialValues: {
-            email: '', password: '', firstName: '', lastName: '', phone: ''
+            email: '', password: contentPhone, firstName: '', lastName: '', phone: ''
         },
         onSubmit: (values) => {
             const {email, password, lastName, firstName, phone} = values;
-            const userData = new FormData();
-            userData.append("email", email);
-            userData.append("password", password);
 
+            register(email, password, {
+                lastName,
+                firstName,
+                phone,
+                email
+            })
         }
     });
 
+    useEffect(() => {
+        if (responseState || responseMessage) {
+
+
+            const time = setTimeout(() => {
+                setResponseState(false)
+                setResponseMessage('')
+            }, 3500)
+            return () => {
+                clearTimeout(time)
+            };
+        }
+    }, [responseState, responseMessage]);
+
+
+//console.log("=================== NEW =================")
     return (
         <SafeAreaView style={{
-            paddingHorizontal: pixelSizeHorizontal(24),
+            flex: 1,
             backgroundColor: '#fff',
             alignItems: 'center'
         }}>
+            <Toast title={responseType} message={responseMessage} state={responseState} type={responseType}/>
             <ScrollView scrollEnabled
                         showsVerticalScrollIndicator={false}
                         style={{
-                            width: '100%'
+                            width: '100%',
+                            paddingHorizontal: pixelSizeHorizontal(24),
                         }}
                         contentContainerStyle={{
                             alignItems: 'center',
@@ -138,186 +226,188 @@ const SignUp = ({navigation}:any) => {
 
                 </View>
 
-                    <KeyboardAvoidingView keyboardVerticalOffset={-64} style={styles.inputWrap}
-                                          behavior={Platform.OS === "ios" ? "padding" : "height"}>
+                <KeyboardAvoidingView keyboardVerticalOffset={-64} style={styles.inputWrap}
+                                      behavior={Platform.OS === "ios" ? "padding" : "height"}>
 
-                        <DefaultTextInput
-                            placeholder="FirstName" label="First Name"
-                            autoCapitalize='none'
-                            keyboardAppearance='dark'
-                            keyboardType='default'
-                            returnKeyType='next'
-                            returnKeyLabel='next'
-                            touched={touched.firstName}
-                            error={errors.firstName}
-                            onFocus={() => setFocusFirstName(true)}
-                            onChangeText={(e) => {
-                                handleChange('firstName')(e);
-                                setContentFirstName(e);
+                    <DefaultTextInput
+                        placeholder="FirstName" label="First Name"
+                        autoCapitalize='none'
+                        keyboardAppearance='dark'
+                        keyboardType='default'
+                        returnKeyType='next'
+                        returnKeyLabel='next'
+                        touched={touched.firstName}
+                        error={errors.firstName}
+                        onFocus={() => setFocusFirstName(true)}
+                        onChangeText={(e) => {
+                            handleChange('firstName')(e);
+                            setContentFirstName(e);
+                        }}
+                        onBlur={(e) => {
+                            handleBlur('firstName')(e);
+                            setFocusFirstName(false);
+                        }}
+                        focus={focusFirstName}
+                        value={contentFirstName}
+                    />
+
+
+                    <DefaultTextInput
+                        placeholder="Last Name" label="Last Name"
+                        autoCapitalize='none'
+                        keyboardAppearance='dark'
+                        keyboardType='default'
+                        returnKeyType='next'
+                        returnKeyLabel='next'
+                        touched={touched.lastName}
+                        error={errors.lastName}
+                        onFocus={() => setFocusLastName(true)}
+                        onChangeText={(e) => {
+                            handleChange('lastName')(e);
+                            setContentLastName(e);
+                        }}
+                        onBlur={(e) => {
+                            handleBlur('lastName')(e);
+                            setFocusLastName(false);
+                        }}
+                        focus={focusLastName}
+                        value={contentLastName}
+                    />
+
+
+                    <DefaultTextInput placeholder="Email" label="Email"
+                                      autoCapitalize='none'
+                                      keyboardAppearance='dark'
+                                      keyboardType='email-address'
+                                      returnKeyType='next'
+                                      returnKeyLabel='next'
+                                      touched={touched.email}
+                                      error={errors.email}
+                                      onFocus={() => setFocusEmail(true)}
+                                      onChangeText={(e) => {
+                                          handleChange('email')(e);
+                                          setContentEmail(e);
+                                      }}
+                                      onBlur={(e) => {
+                                          handleBlur('email')(e);
+                                          setFocusEmail(false);
+                                      }}
+                                      focus={focusEmail}
+                                      value={contentEmail}
+                    />
+
+                    <View style={{
+                        width: '100%',
+                        justifyContent: "flex-start",
+
+                    }}>
+                        <Text style={[{
+                            color: '#333'
+                        },
+                            styles.label]}>
+                            Phone Number
+                        </Text>
+                        <PhoneInput
+                            value={values.phone}
+                            placeholder="Phone number"
+                            containerStyle={{
+                                borderRadius: 10,
+                                borderColor: '#ddd',
+                                width: '100%',
+                                height: 60,
+                                marginTop: 8,
+                                marginBottom: 5,
+                                borderWidth: 1,
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                backgroundColor: '#fff'
                             }}
-                            onBlur={(e) => {
-                                handleBlur('firstName')(e);
-                                setFocusFirstName(false);
+                            ref={phoneInput}
+                            defaultValue={value}
+                            defaultCode="NG"
+                            layout="first"
+                            onChangeText={(text) => {
+                                setFieldValue('phone', text)
+                                checkNumber()
                             }}
-                            focus={focusFirstName}
-                            value={contentFirstName}
+                            onChangeFormattedText={(text) => {
+                                setFormattedValue(text);
+                                setContentPhone(text);
+                            }}
+                            // withDarkTheme
+                            //autoFocus
                         />
-
-
-                        <DefaultTextInput
-                            placeholder="Last Name" label="Last Name"
-                            autoCapitalize='none'
-                            keyboardAppearance='dark'
-                            keyboardType='default'
-                            returnKeyType='next'
-                            returnKeyLabel='next'
-                            touched={touched.lastName}
-                            error={errors.lastName}
-                            onFocus={() => setFocusLastName(true)}
-                            onChangeText={(e) => {
-                                handleChange('lastName')(e);
-                                setContentLastName(e);
-                            }}
-                            onBlur={(e) => {
-                                handleBlur('lastName')(e);
-                                setFocusLastName(false);
-                            }}
-                            focus={focusLastName}
-                            value={contentLastName}
-                        />
-
-
-                        <DefaultTextInput placeholder="Email" label="Email"
-                                          autoCapitalize='none'
-                                          keyboardAppearance='dark'
-                                          keyboardType='email-address'
-                                          returnKeyType='next'
-                                          returnKeyLabel='next'
-                                          touched={touched.email}
-                                          error={errors.email}
-                                          onFocus={() => setFocusEmail(true)}
-                                          onChangeText={(e) => {
-                                              handleChange('email')(e);
-                                              setContentEmail(e);
-                                          }}
-                                          onBlur={(e) => {
-                                              handleBlur('email')(e);
-                                              setFocusEmail(false);
-                                          }}
-                                          focus={focusEmail}
-                                          value={contentEmail}
-                        />
-
                         <View style={{
-                            width: '100%',
-                            justifyContent: "flex-start",
-
+                            paddingBottom: 20,
+                            justifyContent: 'flex-start',
                         }}>
-                            <Text style={[{
-                                color: '#333'
-                            },
-                                styles.label]}>
-                                Phone Number
-                            </Text>
-                            <PhoneInput
-                                containerStyle={{
-                                    borderRadius: 10,
-                                    borderColor: '#ddd',
-                                    width: '100%',
-                                    height: 60,
-                                    marginTop: 8,
-                                    marginBottom: 5,
-                                    borderWidth: 1,
-                                    flexDirection: 'row',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    backgroundColor:'#fff'
-                                }}
-                                ref={phoneInput}
-                                defaultValue={value}
-                                defaultCode="NG"
-                                layout="first"
-                                onChangeText={(text) => {
-                                    setValue(text);
-                                    checkNumber()
-                                }}
-                                onChangeFormattedText={(text) => {
-                                    setFormattedValue(text);
-
-                                }}
-                               // withDarkTheme
-                                //autoFocus
-                            />
-                            <View style={{
-                                paddingBottom: 20,
-                                justifyContent: 'flex-start',
-                            }}>
-                                {
-                                    valid && <Text style={styles.errorMessage}>{phoneNumberError}</Text>
-                                }
-                            </View>
-
+                            {
+                                valid && <Text style={styles.errorMessage}>{phoneNumberError}</Text>
+                            }
                         </View>
 
-
-                        <DefaultTextInput placeholder="Password" label="Password"
-                                          autoCapitalize='none'
-                                          keyboardAppearance='dark'
-                                          password
-                                          action={() => setTogglePass(!togglePass)}
-                                          secureTextEntry={togglePass}
-                                          keyboardType='default'
-                                          returnKeyType='go'
-                                          returnKeyLabel='go'
-                                          touched={touched.password}
-                                          error={errors.password}
-                                          onFocus={() => setFocusPassword(true)}
-                                          onChangeText={(e) => {
-                                              handleChange('password')(e);
-                                              setContentPassword(e);
-                                          }}
-                                          onBlur={(e) => {
-                                              handleBlur('password')(e);
-                                              setFocusPassword(false);
-                                          }}
-                                          focus={focusPassword}
-                                          value={contentPassword}
-                        />
-
-                        <TouchableOpacity
-                            onPress={() => {
-                                handleSubmit();
-                            }}
-
-                            activeOpacity={0.7}
-                            style={{
-                                borderRadius: 10,
-                                backgroundColor:Colors.primaryColor,
-                                width: widthPixel(350),
-                                height: 60,
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                            }}
-                        >
-                            <Text style={{
-                                color: 'white',
-                                fontSize: fontPixel(20),
-                                fontFamily: 'GT-bold'
-                            }}> Creat account
-                            </Text>
-
-                        </TouchableOpacity>
-
-                    </KeyboardAvoidingView>
+                    </View>
 
 
-                <View style={{
+                    <DefaultTextInput placeholder="Password" label="Password"
+                                      autoCapitalize='none'
+                                      keyboardAppearance='dark'
+                                      password
+                                      action={() => setTogglePass(!togglePass)}
+                                      secureTextEntry={togglePass}
+                                      keyboardType='default'
+                                      returnKeyType='go'
+                                      returnKeyLabel='go'
+                                      touched={touched.password}
+                                      error={errors.password}
+                                      onFocus={() => setFocusPassword(true)}
+                                      onChangeText={(e) => {
+                                          handleChange('password')(e);
+                                          setContentPassword(e);
+                                      }}
+                                      onBlur={(e) => {
+                                          handleBlur('password')(e);
+                                          setFocusPassword(false);
+                                      }}
+                                      focus={focusPassword}
+                                      value={contentPassword}
+                    />
+
+
+                    <TouchableOpacity
+                        disabled={!isValid || loading}
+                        onPress={() => {
+                            handleSubmit();
+                        }}
+
+                        activeOpacity={0.7}
+                        style={[styles.submitBtn, {
+                            backgroundColor: !isValid ? "#ddd" : Colors.primaryColor,
+                        }]}
+                    >
+                        {
+                            loading ? <ActivityIndicator color={Colors.light.background} size={"large"}/>
+                                :
+                                <Text style={{
+                                    color: 'white',
+                                    fontSize: fontPixel(20),
+                                    fontFamily: 'GT-bold'
+                                }}> Creat account
+                                </Text>
+                        }
+                    </TouchableOpacity>
+
+                </KeyboardAvoidingView>
+
+
+                {/*   <View style={{
                     width: '90%',
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     flexDirection: 'row',
                     height: 20,
-                    marginTop:40
+                    marginTop: 40
                 }}>
 
 
@@ -331,13 +421,13 @@ const SignUp = ({navigation}:any) => {
                     </Text>
                     <View style={styles.border}/>
                 </View>
+*/}
 
-
-                <TouchableOpacity onPress={() => navigation.navigate('Root')} style={{
-                    width: widthPixel(350),
-                    marginTop:20,
-                    height: 60,
+                {/* <TouchableOpacity style={{
                     backgroundColor: '#eee',
+                    width: '100%',
+                    marginTop: 20,
+                    height: 60,
                     borderRadius: 10,
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -360,12 +450,12 @@ const SignUp = ({navigation}:any) => {
                     }}>
                         Google
                     </Text>
-                </TouchableOpacity>
+                </TouchableOpacity>*/}
 
 
                 <TouchableOpacity onPress={() => navigation.navigate('LoginScreen')} style={{
                     width: '90%',
-                    marginTop:50,
+                    marginTop: 50,
                     justifyContent: 'center',
                     alignItems: 'center',
                     flexDirection: 'row'
@@ -402,12 +492,13 @@ const SignUp = ({navigation}:any) => {
 
 const styles = StyleSheet.create({
     formContainer: {
-     flex:1,
+        flex: 1,
         justifyContent: 'center',
         width: '100%',
         alignItems: 'center',
     },
     inputWrap: {
+        width: '100%',
         justifyContent: 'space-evenly',
         alignItems: 'center',
     },
@@ -429,6 +520,13 @@ const styles = StyleSheet.create({
         width: '25%',
         borderWidth: 1,
         borderColor: "#EEEEEE"
+    },
+    submitBtn: {
+        borderRadius: 10,
+        width: '100%',
+        height: 60,
+        alignItems: 'center',
+        justifyContent: 'center'
     }
 })
 

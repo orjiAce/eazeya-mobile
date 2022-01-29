@@ -9,7 +9,7 @@
     "owner": "eazeya",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/logos/Eazeya.png",
+      "image": "./assets/logo/Eazeya.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -32,7 +32,7 @@
       "versionCode": 1,
       "package": "com.eazeya.eazeya",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/logos/adaptive-icon.png",
+        "foregroundImage": "./assets/logo/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
       "permissions": ["CALL_PHONE","ACCESS_BACKGROUND_LOCATION","ACCESS_FINE_LOCATION","CAMERA"]

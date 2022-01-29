@@ -1,14 +1,15 @@
 import React, {useEffect, useState} from 'react';
 
-import {StyleSheet, Text, TouchableOpacity, View, Platform} from 'react-native';
+import {StyleSheet, Text, TouchableOpacity, View, Platform, Pressable} from 'react-native';
 import {SafeAreaView} from "react-native-safe-area-context";
 import {fontPixel, heightPixel, pixelSizeHorizontal, widthPixel} from "../utils/normalize";
-import {Feather, FontAwesome, Ionicons, Octicons} from "@expo/vector-icons";
+import {FontAwesome, FontAwesome5, Ionicons, MaterialCommunityIcons, Octicons} from "@expo/vector-icons";
 import {GooglePlacesAutocomplete} from "react-native-google-places-autocomplete";
 import Colors from "../constants/Colors";
 import {GOOGLE_MAPS_API_KEY} from "@env";
 import * as Location from 'expo-location'
 import {Constants} from "expo-constants";
+import {RadioButton} from 'react-native-paper';
 import {useDispatch} from "react-redux";
 import {setDestination, setOrigin} from "../app/slices/navigationSlice";
 
@@ -21,9 +22,18 @@ const LocationScreen = ({navigation}: any) => {
     const dispatch = useDispatch()
 
 
+    const [dropOff, setDropOff] = useState('');
+    const [pickup, setPickup] = useState('');
+
     const [location, setLocation] = useState<any>(null);
     const [errorMsg, setErrorMsg] = useState('');
 
+    const [type, setType] = useState('');
+
+    let valid = false
+    if(dropOff !== '' && pickup !== '' && type !== ''){
+        valid = true
+    }
 
 
     useEffect(() => {
@@ -54,11 +64,11 @@ const LocationScreen = ({navigation}: any) => {
     }
 
 
-/*    useEffect(() => {
+    /*    useEffect(() => {
 
-        navigator.geolocation.getCurrentPosition((l) => console.log('My location:',location));
+            navigator.geolocation.getCurrentPosition((l) => console.log('My location:',location));
 
-    }, []);*/
+        }, []);*/
 
 
     return (
@@ -188,12 +198,12 @@ const LocationScreen = ({navigation}: any) => {
 
                         enableHighAccuracyLocation={true}
                         autoFillOnNotFound={true}
-                        currentLocationLabel="Choose current location"
+                        //currentLocationLabel="Choose current location"
                         listViewDisplayed="auto"
                         listUnderlayColor={"#333"}
                         nearbyPlacesAPI="GooglePlacesSearch"
                         debounce={400}
-                        currentLocation={true}
+                       // currentLocation={true}
                         placeholder="Origin"
                         enablePoweredByContainer={false}
                         minLength={2}
@@ -205,7 +215,7 @@ const LocationScreen = ({navigation}: any) => {
                             language: 'en', // language of the results
                         }}
                         onPress={(data, details = null) => {
-
+                            setPickup(data.description)
                             dispatch(setOrigin(
                                 {
                                     location: details?.geometry.location,
@@ -213,6 +223,7 @@ const LocationScreen = ({navigation}: any) => {
                                 }
                             ))
                         }}
+
                         onFail={(error) => console.error(error)}
                         requestUrl={{
                             url:
@@ -278,12 +289,12 @@ const LocationScreen = ({navigation}: any) => {
                         }}
 
                         autoFillOnNotFound={true}
-                        currentLocationLabel="Choose current location"
+                       // currentLocationLabel="Choose current location"
                         listViewDisplayed="auto"
                         listUnderlayColor={"#333"}
                         nearbyPlacesAPI="GooglePlacesSearch"
                         debounce={400}
-                        currentLocation={true}
+                       // currentLocation={true}
                         placeholder="Drop off"
                         enablePoweredByContainer={false}
                         minLength={2}
@@ -296,12 +307,14 @@ const LocationScreen = ({navigation}: any) => {
                             language: 'en', // language of the results
                         }}
                         onPress={(data, details = null) => {
+                            setDropOff(data.description)
                             dispatch(
                                 setDestination({
                                     location: details?.geometry.location,
                                     description: data.description,
                                 })
                             );
+
                         }}
                         onFail={(error) => console.error(error)}
                         requestUrl={{
@@ -321,25 +334,95 @@ const LocationScreen = ({navigation}: any) => {
                 height: heightPixel(400),
                 width: '100%',
                 marginTop: 40,
-                zIndex: -1
+                zIndex: -1,
+                alignItems: 'center',
+                justifyContent: 'space-between'
             }}>
+                <View style={{
+                    width: '100%',
+                    flexDirection: 'row',
+                    justifyContent: 'space-evenly'
+                }}>
+                    <TouchableOpacity onPress={() => setType('Ride')} style={[styles.selectBox, {
+                        backgroundColor: type === 'Ride' ? Colors.tintPrimary : "#F8F9F9",
+                        borderColor: type === 'Ride' ? Colors.primaryColor : "#F8F9F9",
+                    }]}
+                    >
+
+                        <FontAwesome5 name="taxi" size={20} color="black"/>
+                        <Text style={styles.selectText}>
+                            Ride
+                        </Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity onPress={() => setType('Delivery')} style={[styles.selectBox, {
+                        backgroundColor: type === 'Delivery' ? Colors.tintPrimary : "#F8F9F9",
+                        borderColor: type === 'Delivery' ? Colors.primaryColor : "#F8F9F9",
+                    }]}
+                    >
+
+                        <MaterialCommunityIcons name="motorbike" size={20} color="black"/>
+                        <Text style={styles.selectText}>
+                            Delivery
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+
+
+                <View style={styles.summary}>
+
+                    <Text style={{
+                        width: '90%',
+                        fontSize: fontPixel(14),
+                        marginBottom: 15,
+                        textAlign: 'left',
+                        fontFamily: 'GT-medium',
+                        color: "#333"
+                    }}>
+                        Summary
+                    </Text>
+                    <View style={styles.summaryBox}>
+                        <View style={{
+                            height: '25%',
+                            width:'100%'
+                        }}>
+                            <Text style={styles.tintTitleText}>
+                                Pickup address
+                            </Text>
+                            <Text style={styles.pickupAdd}>
+                                {pickup}
+                            </Text>
+                        </View>
+
+                        <View style={{
+                            height: '25%',
+
+                        }}>
+                            <Text style={styles.tintTitleText}>
+                               Destination
+                            </Text>
+                            <Text style={styles.dropOffAdd}>
+                                {dropOff}
+                            </Text>
+                        </View>
+                    </View>
+                </View>
 
             </View>
 
-            <TouchableOpacity onPress={() => navigation.navigate("MapScreen")} style={{
-                width: widthPixel(250),
-                height: 60,
-                borderRadius: 10,
-                backgroundColor: Colors.primaryColor,
-                alignItems: 'center',
-                justifyContent: 'center'
-            }}>
+
+            <TouchableOpacity disabled={!valid} onPress={() => navigation.navigate("MapScreen",{
+                rideType:type
+            })}
+                              style={[styles.continue,{
+                                  backgroundColor: valid ? Colors.primaryColor : '#ddd',
+                              }]}>
                 <Text style={{
                     fontFamily: 'GT-bold',
                     color: '#fff',
                     fontSize: fontPixel(20)
                 }}>
-                    START HERE
+                    Continue
                 </Text>
             </TouchableOpacity>
 
@@ -367,7 +450,59 @@ const styles = StyleSheet.create({
         borderColor: '#ececec',
         borderWidth: 1,
         borderStyle: 'dashed'
+    },
+    selectBox: {
+        width: '40%',
+        height: heightPixel(140),
+        borderRadius: 10,
+        borderWidth: 1,
+        padding: 10,
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+    selectText: {
+        marginTop: 10,
+        color: "#1B1B1B",
+        fontFamily: 'GT-medium',
+        fontSize: fontPixel(16)
+    },
+    continue: {
+        marginTop: 20,
+        width: '90%',
+        height: 60,
+        borderRadius: 10,
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+    summary: {
+        width: '100%',
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+    },
+    summaryBox: {
+        padding: 10,
+        width: '90%',
+        borderRadius: 10,
+        height: heightPixel(200),
+        borderWidth: 1,
+        borderColor: "#E5E5E5"
+    },
+    tintTitleText: {
+        color: Colors.tintText,
+        fontSize: fontPixel(12),
+
+    },
+    pickupAdd: {
+        color: Colors.primaryColor,
+        fontFamily: 'GT-medium',
+        fontSize: fontPixel(14)
+    },
+    dropOffAdd: {
+        color: "#161D4D",
+        fontFamily: 'GT-medium',
+        fontSize: fontPixel(14)
     }
+
 })
 
 export default LocationScreen;

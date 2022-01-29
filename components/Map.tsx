@@ -35,7 +35,7 @@ const Map = () => {
         if (!origin || !destination) return;
 
         mapRef.current?.fitToSuppliedMarkers(["origin", "destination"], {
-            edgePadding: {top: 70, right: 70, bottom: 70, left: 70},
+            edgePadding: {top: 100, right: 100, bottom: 100, left: 100},
         });
     }, [state]);
 
@@ -55,16 +55,8 @@ const Map = () => {
         getTravelTime();
     }, [origin, destination, GOOGLE_MAPS_API_KEY]);
 
-    const [location, setLocation] = useState<any>(null);
-
-    const getUserCurrentLocation = async () => {
-
-        let location = await Location.getCurrentPositionAsync({});
-        setLocation(location);
-        // navigator.geolocation.getCurrentPosition((l) => console.log('My location:',location));
 
 
-    }
 
 
     //  navigator.geolocation.getCurrentPosition((l) => console.log('location:',location));
@@ -74,10 +66,10 @@ const Map = () => {
         <MapView
             //onUserLocationChange={() => getUserCurrentLocation()}
 
-            showsUserLocation={true}
-            followsUserLocation={true}
-            userLocationPriority="high"
-            showsTraffic={true}
+            //showsUserLocation={true}
+            //followsUserLocation={true}
+            //userLocationPriority="high"
+            //showsTraffic={true}
             loadingEnabled={true}
             loadingIndicatorColor={Colors.primaryColor}
             zoomEnabled={true}
@@ -87,6 +79,11 @@ const Map = () => {
                 flex: 1
             }}
 
+            onMapReady={() => {
+                mapRef.current?.fitToSuppliedMarkers(["origin", "destination"], {
+                    edgePadding: {top: 100, right: 100, bottom: 100, left: 100},
+                });
+            }}
             ref={mapRef}
             initialRegion={{
                 latitude: origin?.location?.lat || 37.78825,
@@ -124,15 +121,14 @@ const Map = () => {
                     apikey={GOOGLE_MAPS_API_KEY}
                     strokeWidth={3}
                     strokeColor="blue"
-                    lineDashPhase={9}
                     mode="DRIVING"
                     lineCap={"butt"}
-                    lineDashPattern={[0]}
+                    lineDashPattern={[1]}
                     optimizeWaypoints={true}
                     //zoom out on the map once it loads
                     onReady={(result) => {
                         mapRef.current?.fitToSuppliedMarkers(["origin", "destination"], {
-                            edgePadding: {top: 70, right: 70, bottom: 70, left: 70},
+                            edgePadding: {top: 100, right: 100, bottom: 100, left: 100},
                         });
                     }}
                     onError={(errorMessage) => {
@@ -155,32 +151,30 @@ const Map = () => {
                 />
             )}
 
-            {origin?.location && destination?.location && location?.coords && (
+
+           {/* {destination?.location && (
                 <Marker
 
                     image={require('../assets/images/car.png')}
                     draggable={true}
                     coordinate={{
-                        latitude: location?.coords?.latitude,
-                        longitude: location?.coords?.longitude,
-
+                        latitude: destination.location.lat,
+                        longitude: destination.location.lng,
                     }}
                     title="userLocation"
-                    description={origin.description}
+                    description={destination.description}
                     identifier="userLocation"
                 />
-            )}
+            )}*/}
 
             {destination?.location && (
-                <MarkerAnimated
+                <Marker
                     draggable
-                    flat={true}
                     //onDragStart={(data) => console.log(data)}
                     coordinate={{
                         latitude: destination.location.lat,
                         longitude: destination.location.lng,
                     }}
-
                     title="Destination"
                     description={destination.description}
                     identifier="destination"

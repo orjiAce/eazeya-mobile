@@ -14,6 +14,7 @@ const StartScreen = ({navigation}: any) => {
         }}>
 
 
+
             <ScrollView scrollEnabled
                         style={{
                             width: '100%'
@@ -72,7 +73,7 @@ const StartScreen = ({navigation}: any) => {
 
 
                 <View style={styles.buttonWrap}>
-                    <TouchableOpacity style={{
+                    <TouchableOpacity onPress={() => navigation.navigate('SignUp')} style={{
                         width: widthPixel(250),
                         height: 60,
                         borderRadius: 10,

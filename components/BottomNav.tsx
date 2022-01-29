@@ -6,7 +6,6 @@ import UserProfile from "../screens/UserProfile";
 import Colors from "../constants/Colors";
 import RideHistory from "../screens/RideHistory";
 import ChatScreen from "../screens/ChatScreen";
-import Home from "../screens/Home";
 
 
 const Tabs = AnimatedTabBarNavigator()

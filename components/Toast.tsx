@@ -1,13 +1,15 @@
 import React from 'react';
 
-import {Text, TouchableOpacity, View} from 'react-native';
+import {Text, TouchableOpacity,StatusBar, View} from 'react-native';
 import {AnimatePresence, MotiView} from "moti";
-import Colors, {errorRed} from "../constants/Colors";
-import {fontPixel} from "./utils/normalize";
+import Colors from "../constants/Colors";
+import {fontPixel, heightPixel} from "../utils/normalize";
+import {Ionicons} from "@expo/vector-icons";
 
 
 interface ToastInterface {
     message: string,
+    title: string,
     state: boolean,
     type: string,
     action?: () => void
@@ -15,16 +17,17 @@ interface ToastInterface {
 
 
 const Toast = ({
+                   title,
                    message, state, type
                }: ToastInterface) => {
 
     let color;
     if (type === 'error') {
-        color = errorRed
+        color = Colors.tintRed
     } else if (type === 'success') {
-        color = Colors.successTint
+        color = Colors.success
     } else {
-        color = Colors.primary;
+        color = Colors.primaryColor;
     }
 
 
@@ -35,7 +38,7 @@ const Toast = ({
 
                 <MotiView from={{
                     opacity: 0,
-                    translateY: -50,
+                    translateY: 50,
                 }}
                           animate={{
                               opacity: 1,
@@ -43,30 +46,52 @@ const Toast = ({
                           }}
                           exit={{
                               opacity: 0,
-                              translateY: -50,
+                              translateY: 50,
                           }}
-
                           style={{
+                              top: heightPixel(50),
                               backgroundColor: color,
-                              width: '100%',
-                              borderBottomRightRadius: 10,
-                              borderBottomLeftRadius: 10,
-                              height: 120,
-                              alignItems: 'center',
-                              justifyContent: 'flex-end',
+                              width: '90%',
+                              borderRadius: 20,
+                              minHeight: 80,
+                              alignItems: 'flex-start',
+                              justifyContent: 'space-evenly',
                               position: 'absolute',
-                              zIndex: 10,
+                              zIndex: 100,
                               padding: 20,
+                              flexDirection: 'row',
                           }}>
-                    <Text style={{
-                        lineHeight: 18,
-                        color: '#eee',
-                        fontSize: fontPixel(14),
-                        fontFamily: 'inter-bold',
-                        textAlign: 'center'
+
+                    <Ionicons name="checkmark-circle-outline" size={20} color="black"/>
+                    <View style={{
+                        height: '90%',
+                        width: '95%',
+                        justifyContent: 'center',
+                        paddingLeft: 8,
+                        flexDirection: 'column',
+                        alignItems: 'flex-start'
                     }}>
-                        {message}
-                    </Text>
+                        <Text style={{
+                            lineHeight: 18,
+                            textTransform:'uppercase',
+                            color: '#333',
+                            fontSize: fontPixel(14),
+                            fontFamily: 'GT-bold',
+                            textAlign: 'center'
+                        }}>
+                            {title}
+                        </Text>
+                        <Text style={{
+                            lineHeight: 16,
+                            color: '#333',
+                            fontSize: fontPixel(14),
+                            fontFamily: 'GT-regular',
+                            textAlign: 'center'
+                        }}>
+                            {message}
+                        </Text>
+
+                    </View>
 
 
                 </MotiView>

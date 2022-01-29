@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {Image, Text, View} from 'react-native';
+import {Image, Text, TouchableOpacity, View} from 'react-native';
 import {Feather} from "@expo/vector-icons";
 import {fontPixel} from "../../utils/normalize";
 
@@ -13,7 +13,7 @@ const TopBar = ({routeName,navigation }: {routeName: string,navigation:any}) => 
             height:80,
             flexDirection:'row'
         }}>
-            <Image source={require('../../assets/logos/adaptive-icon.png')}
+            <Image source={require('../../assets/logo/adaptive-icon.png')}
 
             style={{
                 width:30,
@@ -29,8 +29,16 @@ const TopBar = ({routeName,navigation }: {routeName: string,navigation:any}) => 
                     {routeName}
                 </Text>
             </View>
+<TouchableOpacity onPress={() => navigation.navigate('Notifications')} style={{
+    width:35,
+    height:35,
+    alignItems:'center',
+    justifyContent:'center'
+}}>
+
 
             <Feather name="bell" size={24} color="black" />
+</TouchableOpacity>
         </View>
     );
 };

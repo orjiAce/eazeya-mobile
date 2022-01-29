@@ -4,7 +4,7 @@ import React, {FC} from "react";
 import Colors from "../../constants/Colors";
 import {fontPixel} from "../../utils/normalize";
 import {Ionicons} from "@expo/vector-icons";
-
+import {CardDateTextInput} from "rn-credit-card-textinput";
 
 interface Props extends TextInputProps {
     placeholder: string;
@@ -33,7 +33,7 @@ const BottomSheetInput: FC<Props> = ({
                                      }) => {
 
 
-    let validationColor = !touched ? '#ddd' : error ? '#FF5A5F' : focus ? "#161D4D" : '#ddd'
+    let validationColor = !touched ? '#ddd' : error ? '#FF5A5F' : focus ? Colors.success : '#ddd'
 
     return (
         <View style={{
@@ -54,7 +54,7 @@ const BottomSheetInput: FC<Props> = ({
                 marginTop: 8,
                 marginBottom: 5,
                 borderRadius: 10,
-                borderWidth: 1,
+                borderWidth: 2,
                 flexDirection: 'row',
                 alignItems: 'center',
                 justifyContent: 'center'
@@ -69,7 +69,7 @@ const BottomSheetInput: FC<Props> = ({
                         //  backgroundColor:  'rgba(151, 151, 151, 0.25)',
                         width: password ? '90%' : '100%',
                         color: '#131313',
-alignItems:'center'
+                        alignItems: 'center'
                     }]}/>
                 {
                     password
@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
         height: '100%',
     },
     label: {
-        marginLeft:10,
+        marginLeft: 10,
         fontSize: fontPixel(14),
         fontFamily: 'GT-bold',
     },

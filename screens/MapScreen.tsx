@@ -1,31 +1,37 @@
-import {TouchableOpacity, View, Text} from "react-native";
+import {TouchableOpacity, View, Text, StyleSheet} from "react-native";
 
 
 import Map from "../components/Map";
 import {selectTravelTimeInfo} from "../app/slices/navigationSlice";
-import React, {useCallback, useMemo, useRef, useState} from "react";
-import {useNavigation} from "@react-navigation/native";
+import React, {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {fontPixel, heightPixel} from "../utils/normalize";
 import {Ionicons} from "@expo/vector-icons";
 import {useSelector} from "react-redux";
 import RideInfo from "../components/RideInfo";
 import BottomSheet from "@gorhom/bottom-sheet";
+import {useAppDispatch, useAppSelector} from "../app/hooks";
+import Toast from "../components/Toast";
+import {useSetResponse} from "../app/slices/userSlice";
 
 
 const SURGE_CHARGE_RATE = 1.5;
 
-const MapScreen = ({navigation}: any) => {
+const MapScreen = ({navigation, route}: any) => {
 
+    const {rideType} = route.params
 
-    const [height, setHeight] = useState(300);
     const [selected, setSelected] = useState<RidesData[0] | null>(null);
+    const dispatch = useAppDispatch()
     const travelTimeInformation = useSelector(selectTravelTimeInfo);
 
+    const user = useAppSelector(state => state.user)
+
+    const {responseMessage, responseType, responseState} = user
 
     const sheetRef = useRef<BottomSheet>(null);
 
     // variables
-    const snapPoints = useMemo(() => ["35%", "100%"], []);
+    const snapPoints = useMemo(() => ["75%", "100%"], []);
 
     // callbacks
     const handleSheetChange = useCallback((index) => {
@@ -33,35 +39,26 @@ const MapScreen = ({navigation}: any) => {
 
     }, []);
 
+    useEffect(() => {
+        if (responseState || responseMessage) {
+
+
+            const time = setTimeout(() => {
+                dispatch(useSetResponse())
+            }, 3500)
+            return () => {
+                clearTimeout(time)
+            };
+        }
+    }, [responseState, responseMessage]);
 
     return (
         <View style={{
             alignItems: 'center',
             flex: 1
         }}>
-
-            <View style={{
-
-                shadowColor: "black",
-                shadowOffset: {
-                    width: 5,
-                    height: 10
-                },
-                elevation: 14,
-                shadowOpacity: 0.2,
-                shadowRadius: 10,
-                top: '8%',
-                borderRadius: 20,
-                zIndex: 10,
-                position: 'absolute',
-                height: 60,
-                backgroundColor: '#fff',
-                width: '80%',
-                alignItems: 'center',
-                padding: 15,
-                justifyContent: 'space-between',
-                flexDirection: 'row'
-            }}>
+            <Toast title={responseType} message={responseMessage} state={responseState} type={responseType}/>
+            <View style={styles.topBar}>
 
                 <TouchableOpacity onPress={() => navigation.goBack()} style={{
                     width: 40,
@@ -71,33 +68,17 @@ const MapScreen = ({navigation}: any) => {
                 }}>
                     <Ionicons name="arrow-back-outline" size={24} color="black"/>
 
-
                 </TouchableOpacity>
 
 
-                <View style={{
-                    alignItems: 'center',
-                    height: '100%',
-                    justifyContent: 'space-between'
-                }}>
+                <View style={styles.travelInfo}>
 
-
-                    <Text style={{
-                        color: '#161D4D',
-                        fontSize: fontPixel(18),
-                        fontFamily: 'GT-bold'
-                    }}>
+                    <Text style={styles.travelTime}>
                         {travelTimeInformation?.duration?.text} Ride
                     </Text>
 
-                    <Text style={{
-                        color: '#6D6D6D',
-                        fontSize: fontPixel(14),
-                        fontFamily: 'GT-medium'
-                    }}>
+                    <Text style={styles.distance}>
                         {travelTimeInformation?.distance.text}les
-
-
 
                     </Text>
                 </View>
@@ -112,21 +93,14 @@ const MapScreen = ({navigation}: any) => {
             </View>
 
             <View style={{
-                height: "80%",
+                height: "70%",
                 width: '100%'
             }}>
                 <Map/>
             </View>
-            <View style={{
-                position: "absolute",
-                width: '100%',
-                height: 350,
-                bottom: 0,
-                alignItems: 'center',
+            <View style={styles.rideInfo}>
 
-                justifyContent: 'center'
-            }}>
-                <RideInfo snapPoints={snapPoints} sheetRef={sheetRef} handleSheetChange={handleSheetChange}/>
+                <RideInfo rideType={rideType} snapPoints={snapPoints} sheetRef={sheetRef} handleSheetChange={handleSheetChange}/>
             </View>
         </View>
     );
@@ -138,5 +112,52 @@ type RidesData = {
     multiplier: number;
     image: string;
 }[];
+
+const styles = StyleSheet.create({
+    travelTime: {
+        color: '#161D4D',
+        fontSize: fontPixel(18),
+        fontFamily: 'GT-bold'
+    },
+    distance: {
+        color: '#6D6D6D',
+        fontSize: fontPixel(14),
+        fontFamily: 'GT-medium'
+    },
+    topBar: {
+        shadowColor: "black",
+        shadowOffset: {
+            width: 5,
+            height: 10
+        },
+        elevation: 14,
+        shadowOpacity: 0.2,
+        shadowRadius: 10,
+        top: '8%',
+        borderRadius: 20,
+        zIndex: 10,
+        position: 'absolute',
+        height: 60,
+        backgroundColor: '#fff',
+        width: '80%',
+        alignItems: 'center',
+        padding: 15,
+        justifyContent: 'space-between',
+        flexDirection: 'row'
+    },
+    travelInfo: {
+        alignItems: 'center',
+        height: '100%',
+        justifyContent: 'space-between'
+    },
+    rideInfo: {
+        position: "absolute",
+        width: '100%',
+        height: heightPixel(350),
+        bottom: 0,
+        alignItems: 'center',
+        justifyContent: 'center'
+    }
+})
 
 export default MapScreen;
