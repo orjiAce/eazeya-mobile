@@ -82,7 +82,6 @@ function RootNavigator() {
                         <Stack.Screen name="Root" component={BottomNav} options={{headerShown: false}}/>
                         <Stack.Screen name="LocationScreen" component={LocationScreen} options={{headerShown: false}}/>
                         <Stack.Screen name="MapScreen" component={MapScreen} options={{headerShown: false}}/>
-
                         <Stack.Screen name="NotFound" component={NotFoundScreen} options={{title: 'Oops!'}}/>
                         <Stack.Group screenOptions={{presentation: 'modal'}}>
                             <Stack.Screen name="Modal" component={ModalScreen}/>

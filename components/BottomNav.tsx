@@ -36,6 +36,7 @@ export default () => (
                     }}
                     appearance={{
 
+
                         dotCornerRadius: 10,
                         shadow: true,
                         floating: false,
